@@ -9,6 +9,7 @@ You can open, close or check the status of a locker.
 
 * A smartlock The Keys: https://store.the-keys.fr/fr/serrure/8-serrure-connecte.html
 * A gateway: https://store.the-keys.fr/fr/accessoires/11-gateway.html
+* The locker need to be at version 57 for the update status from main loop
 
 ![Pack domotique](https://store.the-keys.fr/71-medium_default/pack-domotique.jpg)
 
