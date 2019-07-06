@@ -862,22 +862,27 @@ function check_status()
   result_status = json.decode(res_status);
   res_code = result_status.code
   fibaro:debug("result: " .. res_code)
+  status_code = 0
   if(res_code == 49) then
     status = "Porte fermée"
+    status_code = 0
     fibaro:debug("Set icon "..lockercloseid)
     fibaro:call(fibaro:getSelfId(), "setProperty", "currentIcon", lockercloseid)
   else
     status = "Porte ouverte"
+    status_code = 1
     fibaro:debug("Set icon "..lockeropenid)
     fibaro:call(fibaro:getSelfId(), "setProperty", "currentIcon", lockeropenid)
   end
+  addGlobalValue('locker_status_'..fibaro:getSelfId(), status_code);
   fibaro:call(fibaro:getSelfId(), "setProperty", "ui.LabelStatus.value", status)
 end
 
-
-
+lastEventTs = os.time()
 lastlog = fibaro:getGlobal('lastlog')
 while (true) do 
+  addGlobalValue('last_event_'..fibaro:getSelfId(), os.time() - lastEventTs);
+
   if lastlog == nil then
     lastlog = -1
   end
@@ -899,6 +904,7 @@ while (true) do
         lastlog = device.last_log
         --fibaro:call(fibaro:getSelfId(), "pressButton", "4")
         check_status()
+        lastEventTs = os.time()
       else
         fibaro:debug("Last log unchanged: "..lastlog)
       end
