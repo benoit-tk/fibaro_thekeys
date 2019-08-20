@@ -859,6 +859,9 @@ function check_status()
   --res = gw:GET("/status") ;
   --fibaro:call(fibaro:getSelfId(), "setProperty", "ui.LabelStatus.value", "checking");
   fibaro:debug("res: "..res_status)
+  if not result_status then
+    return
+  end
   result_status = json.decode(res_status);
   res_code = result_status.code
   fibaro:debug("result: " .. res_code)
@@ -890,27 +893,29 @@ while (true) do
   IP = fibaro:get(fibaro:getSelfId(), "IPAddress")
   fibaro:debug("IP: "..IP)
   local gw = Net.FHttp(IP, 80)
-  res = gw:GET("/lockers" ) ;
-  result = json.decode(res);
-  --search the device
-  for i = 1, #result.devices do   
-    device = result.devices[i]
-    if device.identifier == tonumber(identifier) then
-      fibaro:debug("Found the device")
-      fibaro:debug("result last log: "..device.last_log .. ". Last log: "..lastlog)
-      if device.last_log ~= lastlog then
-        fibaro:debug("New log available: " .. device.last_log)
-        fibaro:setGlobal('lastlog', device.last_log)
-        lastlog = device.last_log
-        --fibaro:call(fibaro:getSelfId(), "pressButton", "4")
-        check_status()
-        lastEventTs = os.time()
-      else
-        fibaro:debug("Last log unchanged: "..lastlog)
-      end
-    else
-      fibaro:debug("Not the device: "..device.identifier)
+  res = gw:GET("/lockers" )
+  if res then
+    result = json.decode(res)
+    --search the device
+    for i = 1, #result.devices do   
+	  device = result.devices[i]
+      if device.identifier == tonumber(identifier) then
+	    fibaro:debug("Found the device")
+	    fibaro:debug("result last log: "..device.last_log .. ". Last log: "..lastlog)
+	    if device.last_log ~= lastlog then
+		  fibaro:debug("New log available: " .. device.last_log)
+		  fibaro:setGlobal('lastlog', device.last_log)
+		  lastlog = device.last_log
+		  --fibaro:call(fibaro:getSelfId(), "pressButton", "4")
+		  check_status()
+		  lastEventTs = os.time()
+	    else
+		  fibaro:debug("Last log unchanged: "..lastlog)
+	    end
+	  else
+	    fibaro:debug("Not the device: "..device.identifier)
+	  end
     end
-    fibaro:sleep(1000)
   end
+  fibaro:sleep(1000)
 end
