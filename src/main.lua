@@ -18,18 +18,18 @@ function addGlobalValue(nom, valeur)
   	if(fibaro:getGlobalValue(nom) ~= nil) then
     	fibaro:setGlobal(nom, valeu)
     else
-      local res ,status, err = Net.FHttp("127.0.0.1",11111):POST('/api/globalVariables', 
+      local res ,status, err = Net.FHttp("127.0.0.1",11111):POST('/api/globalVariables',
           '{"name":"'..nom..'", "value":"'..valeur..'"}')
-    
-      if (tonumber(status) == 200 and tonumber(err)==0) then 
-          fibaro:debug("Global variable "..nom.." created"); 
+
+      if (tonumber(status) == 200 and tonumber(err)==0) then
+          fibaro:debug("Global variable "..nom.." created");
       else
           fibaro:debug("Fail to register global variable: "..status..". err: "..err)
       end
     end
 end
 
-if not fibaro:getGlobal('lockeridentifier'..fibaro:getSelfId()) or fibaro:getGlobal('lockeridentifier'..fibaro:getSelfId()) == "" then
+if not fibaro:getGlobal('lockeridentifier'..fibaro:getSelfId()) or fibaro:getGlobal('lockeridentifier'..fibaro:getSelfId()) != identifier then
   addGlobalValue('lockeridentifier'..fibaro:getSelfId(), identifier)
   addGlobalValue('locker_code'..fibaro:getSelfId(), code)
   fibaro:debug("set variable: "..'locker_identifier'..fibaro:getSelfId().." = "..identifier)
@@ -40,9 +40,9 @@ end
 --Find icons id for buttons.
 if not fibaro:getGlobalValue('locker_close_id') then
   local res ,status, err = Net.FHttp("127.0.0.1",11111):GET('/api/devices/'..fibaro:getSelfId());
-  if (tonumber(status) == 200 and tonumber(err)==0) then 
+  if (tonumber(status) == 200 and tonumber(err)==0) then
       response = json.decode(res)
-      for i = 1, #response.properties.rows do   
+      for i = 1, #response.properties.rows do
           for j = 1, #response.properties.rows[i].elements do
               if response.properties.rows[i].elements[j].name == "ButtonOpen" then
           		  lockeropenid = response.properties.rows[i].elements[j].buttonIcon
@@ -58,7 +58,7 @@ if not fibaro:getGlobalValue('locker_close_id') then
       end
   else
       fibaro:debug("Fail to get device "..fibaro.getSelfId())
-  end 
+  end
 end
 
 
@@ -66,9 +66,9 @@ local sha256 = { }
 
 local MOD = 2 ^ 32
 local MODM = MOD - 1
- 
- 
-function floor(n) 
+
+
+function floor(n)
   return n - (n % 1)
 end
 
@@ -83,8 +83,8 @@ function bxor1 (a,b)
     b = floor(b / 2)
   end
   return r
-end 
- 
+end
+
 local function bxor(a, b, c, ...)
 	local z = nil
 	if b then
@@ -99,7 +99,7 @@ local function bxor(a, b, c, ...)
 		return 0
 	end
 end
- 
+
 local function band(a, b, c, ...)
 	local z
 	if b then
@@ -114,31 +114,31 @@ local function band(a, b, c, ...)
 		return MODM
 	end
 end
- 
+
 local function bnot(x) return(-1 - x) % MOD end
- 
+
 local function rshift1(a, disp)
 	if disp < 0 then return lshift(a, - disp) end
 	return math.floor(a % 2 ^ 32 / 2 ^ disp)
 end
- 
+
 local function rshift(x, disp)
 	if disp > 31 or disp < -31 then return 0 end
 	return rshift1(x % MOD, disp)
 end
- 
+
 local function lshift(a, disp)
 	if disp < 0 then return rshift(a, - disp) end
 	return(a * 2 ^ disp) % 2 ^ 32
 end
- 
+
 local function rrotate(x, disp)
 	x = x % MOD
 	disp = disp % 32
 	local low = band(x, 2 ^ disp - 1)
 	return rshift(x, disp) + lshift(low, 32 - disp)
 end
- 
+
 local k = {
 	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,
 	0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
@@ -157,11 +157,11 @@ local k = {
 	0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,
 	0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2,
 }
- 
+
 local function str2hexa(s)
 	return(string.gsub(s, ".", function(c) return string.format("%02x", string.byte(c)) end))
 end
- 
+
 local function num2s(l, n)
 	local s = ""
 	for i = 1, n do
@@ -171,13 +171,13 @@ local function num2s(l, n)
 	end
 	return s
 end
- 
+
 local function s232num(s, i)
 	local n = 0
 	for i = i, i + 3 do n = n * 256 + string.byte(s, i) end
 	return n
 end
- 
+
 local function preproc(msg, len)
 	local extra = 64 -((len + 9) % 64)
 	len = num2s(8 * len, 8)
@@ -185,7 +185,7 @@ local function preproc(msg, len)
 	assert(#msg % 64 == 0)
 	return msg
 end
- 
+
 local function initH256(H)
 	H[1] = 0x6a09e667
 	H[2] = 0xbb67ae85
@@ -197,7 +197,7 @@ local function initH256(H)
 	H[8] = 0x5be0cd19
 	return H
 end
- 
+
 local function digestblock(msg, i, H)
 	local w = { }
 	for j = 1, 16 do w[j] = s232num(msg, i +(j - 1) * 4) end
@@ -838,7 +838,7 @@ function to_base64(to_encode)
     return string.sub(encoded, 1, -1 - string.len(trailing)) .. trailing
 end
 
-function check_status() 
+function check_status()
   ts = ""..os.time()
 
   fibaro:debug("time: "..ts)
@@ -850,8 +850,8 @@ function check_status()
   local params = "identifier=" .. identifier .. "&hash=" .. b64_hmac .. "&ts=" .. ts
   --fibaro:debug("params: " .. params)
   -- http://<ip>/open
-  
-  
+
+
   IPgw = fibaro:get(fibaro:getSelfId(), "IPAddress")
   fibaro:debug("IP: "..IPgw)
   local gw2 = Net.FHttp(IPgw, 80)
@@ -883,13 +883,13 @@ end
 
 lastEventTs = os.time()
 lastlog = fibaro:getGlobal('lastlog')
-while (true) do 
+while (true) do
   addGlobalValue('last_event_'..fibaro:getSelfId(), os.time() - lastEventTs);
 
   if lastlog == nil then
     lastlog = -1
   end
-  
+
   IP = fibaro:get(fibaro:getSelfId(), "IPAddress")
   fibaro:debug("IP: "..IP)
   local gw = Net.FHttp(IP, 80)
@@ -897,7 +897,7 @@ while (true) do
   if res then
     result = json.decode(res)
     --search the device
-    for i = 1, #result.devices do   
+    for i = 1, #result.devices do
 	  device = result.devices[i]
       if device.identifier == tonumber(identifier) then
 	    fibaro:debug("Found the device")
