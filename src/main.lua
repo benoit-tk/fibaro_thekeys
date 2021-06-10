@@ -29,7 +29,7 @@ function addGlobalValue(nom, valeur)
     end
 end
 
-if not fibaro:getGlobal('lockeridentifier'..fibaro:getSelfId()) or fibaro:getGlobal('lockeridentifier'..fibaro:getSelfId()) != identifier then
+if not fibaro:getGlobal('lockeridentifier'..fibaro:getSelfId()) or fibaro:getGlobal('lockeridentifier'..fibaro:getSelfId()) ~= identifier then
   addGlobalValue('lockeridentifier'..fibaro:getSelfId(), identifier)
   addGlobalValue('locker_code'..fibaro:getSelfId(), code)
   fibaro:debug("set variable: "..'locker_identifier'..fibaro:getSelfId().." = "..identifier)
